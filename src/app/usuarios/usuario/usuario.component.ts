@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { UsuarioService } from '../../services/usuario.service';
+import { ActivatedRoute } from '@angular/router';
+import * as usuarioActions from '../../store/actions/usuario.actions';
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/store/app.reducer';
 import { Usuario } from '../../models/usuario.model';
 
 @Component({
@@ -9,8 +12,24 @@ import { Usuario } from '../../models/usuario.model';
 })
 export class UsuarioComponent implements OnInit {
 
-  constructor(public usuarioService: UsuarioService) { }
+  usuario: Usuario;
+  loading: boolean;
+  error: any;
 
-  ngOnInit() {}
+  constructor(private router: ActivatedRoute, private store: Store<AppState>) { }
+
+  ngOnInit() {
+    this.router.params.subscribe( params => {
+      const id = params['id'];
+      this.store.dispatch(new usuarioActions.CargarUsuario(id));
+    });
+
+    this.store.select('usuario').subscribe(usuario => {
+      this.usuario = usuario.user;
+      this.loading = usuario.loading;
+      this.error = usuario.error;
+    });
+
+  }
 
 }
